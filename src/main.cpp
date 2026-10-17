@@ -1,44 +1,106 @@
 #include <iostream>
+#include <string>
+#include <vector>
+#include <limits>
 
-#include "Livro.hpp"
-#include "Texto.hpp"
+#include "Estante.hpp"
+
+static int lerOpcao() {
+    int opcao;
+
+    if (std::cin >> opcao) {
+        std::cin.ignore(
+            std::numeric_limits<std::streamsize>::max(), '\n'
+        );
+        return opcao;
+    }
+
+    if (std::cin.eof()) {
+        return 0;
+    }
+
+    std::cin.clear();
+    std::cin.ignore(
+        std::numeric_limits<std::streamsize>::max(), '\n'
+    );
+
+    return -1;
+}
+
+static std::string lerLinha(const std::string& rotulo) {
+    std::cout << rotulo;
+    std::string valor;
+    std::getline(std::cin, valor);
+    return valor;
+}
+
+static void imprimir(const Livro& livro) {
+    std::cout << livro.titulo() << " | " << livro.autor() << " | " << livro.genero()
+              << " | " << (livro.lido() ? "lido" : "por ler")
+              << " | nota: " << (livro.temNota() ? std::to_string(livro.nota()) : std::string("-"))
+              << " | comentario: " << (livro.comentario().empty() ? std::string("-") : livro.comentario())
+              << "\n";
+}
+
+static void cadastrar(Estante& estante) {
+    std::string titulo = lerLinha("Titulo: ");
+    std::string autor = lerLinha("Autor: ");
+    std::string genero = lerLinha("Genero: ");
+
+    Resultado resultado = estante.cadastrar(titulo, autor, genero);
+    if (resultado == OK) {
+        std::cout << "Cadastro realizado.\n";
+    } else if (resultado == CAMPO_VAZIO) {
+        std::cout << "Preencha todos os campos obrigatorios.\n";
+    } else if (resultado == JA_EXISTE) {
+        std::cout << "Parece que voce ja cadastrou esse livro.\n";
+    }
+}
+
+static void listar(const Estante& estante) {
+    if (estante.vazia()) {
+        std::cout << "A estante esta vazia.\n";
+        return;
+    }
+    std::vector<Livro> livros = estante.listar();
+    for (std::size_t i = 0; i < livros.size(); ++i) {
+        std::cout << (i + 1) << ") ";
+        imprimir(livros[i]);
+    }
+}
+
+static void remover(Estante& estante) {
+    std::string titulo = lerLinha("Titulo: ");
+    Resultado resultado = estante.remover(titulo);
+    if (resultado == OK) {
+        std::cout << "Livro removido.\n";
+    } else if (resultado == ESTANTE_VAZIA) {
+        std::cout << "A estante esta vazia.\n";
+    } else if (resultado == NAO_ENCONTRADO) {
+        std::cout << "Parece que esse livro nao existe.\n";
+    }
+}
 
 int main() {
-    std::cout << std::boolalpha;
+    Estante estante;
+    bool executando = true;
 
-    Livro a("  Dom Casmurro  ", "Machado de Assis", "Romance", 1);
-    Livro b("Capitaes da Areia", "Jorge Amado", "Romance", 2);
+    while (executando) {
+        std::cout << "\n1 - Cadastrar livro\n2 - Listar livros\n3 - Remover livro\n0 - Sair\n";
+        int opcao = lerOpcao();
 
-    std::cout << "Livro a -> titulo=[" << a.titulo() << "] autor=[" << a.autor()
-              << "] genero=[" << a.genero() << "] lido=" << a.lido()
-              << " temNota=" << a.temNota() << " nota=" << a.nota()
-              << " comentario=[" << a.comentario() << "] ordem=" << a.ordem() << "\n";
-    std::cout << "Livro b -> titulo=[" << b.titulo() << "] autor=[" << b.autor()
-              << "] genero=[" << b.genero() << "] lido=" << b.lido()
-              << " temNota=" << b.temNota() << " nota=" << b.nota()
-              << " comentario=[" << b.comentario() << "] ordem=" << b.ordem() << "\n";
-
-    std::cout << "normalizar([  DoM   Casmurro  ])=[" << Texto::normalizar("  DoM   Casmurro  ") << "]\n";
-    std::cout << "aparar([  oi  ])=[" << Texto::aparar("  oi  ") << "]\n";
-
-    Livro mesmoTitulo("DOM CASMURRO", "Outro Autor", "Outro Genero", 3);
-    std::cout << "a == mesmoTitulo -> " << (a == mesmoTitulo) << "\n";
-    std::cout << "a == b -> " << (a == b) << "\n";
-
-    a.definirLido(true);
-    a.definirNota(8);
-    b.definirLido(true);
-    b.definirNota(8);
-    std::cout << "mesma nota, a ordem=1 e b ordem=2 -> a<b: " << (a < b) << " | b<a: " << (b < a) << "\n";
-
-    b.definirNota(9);
-    std::cout << "b com nota 9 -> a<b: " << (a < b) << " | b<a: " << (b < a) << "\n";
-    std::cout << "a<a: " << (a < a) << "\n";
-
-    a.removerNota();
-    a.definirComentario("Muito bom");
-    std::cout << "a apos removerNota -> temNota=" << a.temNota() << " nota=" << a.nota()
-              << " comentario=[" << a.comentario() << "]\n";
+        if (opcao == 1) {
+            cadastrar(estante);
+        } else if (opcao == 2) {
+            listar(estante);
+        } else if (opcao == 3) {
+            remover(estante);
+        } else if (opcao == 0) {
+            executando = false;
+        } else {
+            std::cout << "Essa opcao nao existe.\n";
+        }
+    }
 
     return 0;
 }
