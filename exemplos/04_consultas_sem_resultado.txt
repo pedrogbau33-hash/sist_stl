@@ -1,0 +1,13 @@
+7
+8
+6
+Fulano
+1
+Livro Solitario
+Autor Solitario
+Genero Solitario
+6
+Autor Inexistente
+7
+8
+0
