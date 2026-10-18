@@ -1,8 +1,16 @@
 #include "Estante.hpp"
 
 #include <algorithm>
+#include <map>
 
 #include "Texto.hpp"
+
+static bool generoAntes(const GeneroEstatistica& a, const GeneroEstatistica& b) {
+    if (a.quantidade != b.quantidade) {
+        return a.quantidade > b.quantidade;
+    }
+    return a.nome < b.nome;
+}
 
 static bool interpretarNota(const std::string& texto, int& valor) {
     if (texto.empty()) {
@@ -148,6 +156,77 @@ std::vector<Livro> Estante::listar() const {
     for (std::list<Livro>::const_iterator it = livros.begin(); it != livros.end(); ++it) {
         resultado.push_back(*it);
     }
+    return resultado;
+}
+
+bool Estante::temLidos() const {
+    for (std::list<Livro>::const_iterator it = livros.begin(); it != livros.end(); ++it) {
+        if (it->lido()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Estante::temAvaliados() const {
+    for (std::list<Livro>::const_iterator it = livros.begin(); it != livros.end(); ++it) {
+        if (it->lido() && it->temNota()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+std::vector<Livro> Estante::livrosDoAutor(const std::string& autor) const {
+    std::vector<Livro> resultado;
+    std::string alvo = Texto::normalizar(autor);
+
+    for (std::list<Livro>::const_iterator it = livros.begin(); it != livros.end(); ++it) {
+        if (Texto::normalizar(it->autor()) == alvo) {
+            resultado.push_back(*it);
+        }
+    }
+
+    return resultado;
+}
+
+std::vector<GeneroEstatistica> Estante::generosMaisLidos() const {
+    std::map<std::string, GeneroEstatistica> contagem;
+
+    for (std::list<Livro>::const_iterator it = livros.begin(); it != livros.end(); ++it) {
+        std::string chave = Texto::normalizar(it->genero());
+        if (contagem.find(chave) == contagem.end()) {
+            GeneroEstatistica estatistica;
+            estatistica.nome = it->genero();
+            estatistica.quantidade = 0;
+            contagem[chave] = estatistica;
+        }
+        if (it->lido()) {
+            contagem[chave].quantidade++;
+        }
+    }
+
+    std::vector<GeneroEstatistica> resultado;
+    for (std::map<std::string, GeneroEstatistica>::const_iterator it = contagem.begin(); it != contagem.end(); ++it) {
+        if (it->second.quantidade > 0) {
+            resultado.push_back(it->second);
+        }
+    }
+
+    std::sort(resultado.begin(), resultado.end(), generoAntes);
+    return resultado;
+}
+
+std::vector<Livro> Estante::livrosMaisBemAvaliados() const {
+    std::vector<Livro> resultado;
+
+    for (std::list<Livro>::const_iterator it = livros.begin(); it != livros.end(); ++it) {
+        if (it->lido() && it->temNota()) {
+            resultado.push_back(*it);
+        }
+    }
+
+    std::sort(resultado.begin(), resultado.end());
     return resultado;
 }
 

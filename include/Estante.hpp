@@ -19,6 +19,11 @@ enum Resultado {
     SEM_AVALIADOS
 };
 
+struct GeneroEstatistica {
+    std::string nome;
+    int quantidade;
+};
+
 class Estante {
 public:
     Estante();
@@ -29,7 +34,12 @@ public:
     Resultado remover(const std::string& titulo);
 
     bool vazia() const;
+    bool temLidos() const;
+    bool temAvaliados() const;
     std::vector<Livro> listar() const;
+    std::vector<Livro> livrosDoAutor(const std::string& autor) const;
+    std::vector<GeneroEstatistica> generosMaisLidos() const;
+    std::vector<Livro> livrosMaisBemAvaliados() const;
 
 private:
     std::list<Livro> livros;

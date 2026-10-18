@@ -126,12 +126,65 @@ static void avaliar(Estante& estante) {
     }
 }
 
+static void listarPorAutor(const Estante& estante) {
+    std::string autor = lerLinha("Autor: ");
+
+    if (estante.vazia()) {
+        std::cout << "A estante esta vazia.\n";
+        return;
+    }
+
+    std::vector<Livro> livros = estante.livrosDoAutor(autor);
+    if (livros.empty()) {
+        std::cout << "Parece que esse autor nao possui livros cadastrados.\n";
+        return;
+    }
+
+    for (std::size_t i = 0; i < livros.size(); ++i) {
+        std::cout << (i + 1) << ") ";
+        imprimir(livros[i]);
+    }
+}
+
+static void mostrarGeneros(const Estante& estante) {
+    if (estante.vazia()) {
+        std::cout << "A estante esta vazia.\n";
+        return;
+    }
+    if (!estante.temLidos()) {
+        std::cout << "Ainda nao ha livros lidos na estante.\n";
+        return;
+    }
+
+    std::vector<GeneroEstatistica> generos = estante.generosMaisLidos();
+    for (std::size_t i = 0; i < generos.size(); ++i) {
+        std::cout << generos[i].nome << ": " << generos[i].quantidade << " lido(s)\n";
+    }
+}
+
+static void mostrarAvaliados(const Estante& estante) {
+    if (estante.vazia()) {
+        std::cout << "A estante esta vazia.\n";
+        return;
+    }
+    if (!estante.temAvaliados()) {
+        std::cout << "Ainda nao ha livros avaliados na estante.\n";
+        return;
+    }
+
+    std::vector<Livro> livros = estante.livrosMaisBemAvaliados();
+    for (std::size_t i = 0; i < livros.size(); ++i) {
+        std::cout << (i + 1) << ") ";
+        imprimir(livros[i]);
+    }
+}
+
 int main() {
     Estante estante;
     bool executando = true;
 
     while (executando) {
-        std::cout << "\n1 - Cadastrar livro\n2 - Listar livros\n3 - Remover livro\n4 - Alterar status de leitura\n5 - Adicionar ou editar nota e comentario\n0 - Sair\n";
+        std::cout << "\n1 - Cadastrar livro\n2 - Listar livros\n3 - Remover livro\n4 - Alterar status de leitura\n5 - Adicionar ou editar nota e comentario\n6 - Listar livros por autor\n7 - Generos mais lidos\n8 - Livros mais bem avaliados\n0 - Sair\n";
         int opcao = lerOpcao();
 
         if (opcao == 1) {
@@ -144,6 +197,12 @@ int main() {
             alterarStatus(estante);
         } else if (opcao == 5) {
             avaliar(estante);
+        } else if (opcao == 6) {
+            listarPorAutor(estante);
+        } else if (opcao == 7) {
+            mostrarGeneros(estante);
+        } else if (opcao == 8) {
+            mostrarAvaliados(estante);
         } else if (opcao == 0) {
             executando = false;
         } else {
