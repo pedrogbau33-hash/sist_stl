@@ -107,12 +107,31 @@ static void alterarStatus(Estante& estante) {
     }
 }
 
+static void avaliar(Estante& estante) {
+    std::string titulo = lerLinha("Titulo: ");
+    std::string nota = lerLinha("Nota (0-10; '-' mantem; vazio remove): ");
+    std::string comentario = lerLinha("Comentario ('-' mantem; vazio remove): ");
+
+    Resultado resultado = estante.avaliar(titulo, nota, comentario);
+    if (resultado == OK) {
+        std::cout << "Avaliacao atualizada.\n";
+    } else if (resultado == ESTANTE_VAZIA) {
+        std::cout << "A estante esta vazia.\n";
+    } else if (resultado == NAO_ENCONTRADO) {
+        std::cout << "Parece que esse livro nao existe.\n";
+    } else if (resultado == NAO_LIDO) {
+        std::cout << "Voce precisa ler esse livro primeiro.\n";
+    } else if (resultado == NOTA_INVALIDA) {
+        std::cout << "Nota invalida, tente um numero entre 0 e 10.\n";
+    }
+}
+
 int main() {
     Estante estante;
     bool executando = true;
 
     while (executando) {
-        std::cout << "\n1 - Cadastrar livro\n2 - Listar livros\n3 - Remover livro\n4 - Alterar status de leitura\n0 - Sair\n";
+        std::cout << "\n1 - Cadastrar livro\n2 - Listar livros\n3 - Remover livro\n4 - Alterar status de leitura\n5 - Adicionar ou editar nota e comentario\n0 - Sair\n";
         int opcao = lerOpcao();
 
         if (opcao == 1) {
@@ -123,6 +142,8 @@ int main() {
             remover(estante);
         } else if (opcao == 4) {
             alterarStatus(estante);
+        } else if (opcao == 5) {
+            avaliar(estante);
         } else if (opcao == 0) {
             executando = false;
         } else {
