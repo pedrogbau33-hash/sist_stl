@@ -47,6 +47,10 @@ int Livro::ordem() const {
 
 void Livro::definirLido(bool lido) {
     lido_ = lido;
+    if (!lido_) {
+        removerNota();
+        removerComentario();
+    }
 }
 
 void Livro::definirNota(int nota) {

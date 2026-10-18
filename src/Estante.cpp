@@ -25,6 +25,20 @@ Resultado Estante::cadastrar(const std::string& titulo, const std::string& autor
     return OK;
 }
 
+Resultado Estante::definirStatus(const std::string& titulo, bool lido) {
+    if (livros.empty()) {
+        return ESTANTE_VAZIA;
+    }
+
+    std::list<Livro>::iterator encontrado = buscar(titulo);
+    if (encontrado == livros.end()) {
+        return NAO_ENCONTRADO;
+    }
+
+    encontrado->definirLido(lido);
+    return OK;
+}
+
 Resultado Estante::remover(const std::string& titulo) {
     if (livros.empty()) {
         return ESTANTE_VAZIA;

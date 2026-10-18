@@ -4,6 +4,7 @@
 #include <limits>
 
 #include "Estante.hpp"
+#include "Texto.hpp"
 
 static int lerOpcao() {
     int opcao;
@@ -81,12 +82,37 @@ static void remover(Estante& estante) {
     }
 }
 
+static void alterarStatus(Estante& estante) {
+    std::string titulo = lerLinha("Titulo: ");
+    std::string status = lerLinha("Novo status (lido / por ler): ");
+
+    std::string chave = Texto::normalizar(status);
+    bool lido;
+    if (chave == "lido") {
+        lido = true;
+    } else if (chave == "por ler") {
+        lido = false;
+    } else {
+        std::cout << "Essa opcao nao existe.\n";
+        return;
+    }
+
+    Resultado resultado = estante.definirStatus(titulo, lido);
+    if (resultado == OK) {
+        std::cout << "Status atualizado.\n";
+    } else if (resultado == ESTANTE_VAZIA) {
+        std::cout << "A estante esta vazia.\n";
+    } else if (resultado == NAO_ENCONTRADO) {
+        std::cout << "Parece que esse livro nao existe.\n";
+    }
+}
+
 int main() {
     Estante estante;
     bool executando = true;
 
     while (executando) {
-        std::cout << "\n1 - Cadastrar livro\n2 - Listar livros\n3 - Remover livro\n0 - Sair\n";
+        std::cout << "\n1 - Cadastrar livro\n2 - Listar livros\n3 - Remover livro\n4 - Alterar status de leitura\n0 - Sair\n";
         int opcao = lerOpcao();
 
         if (opcao == 1) {
@@ -95,6 +121,8 @@ int main() {
             listar(estante);
         } else if (opcao == 3) {
             remover(estante);
+        } else if (opcao == 4) {
+            alterarStatus(estante);
         } else if (opcao == 0) {
             executando = false;
         } else {

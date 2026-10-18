@@ -24,6 +24,7 @@ public:
     Estante();
 
     Resultado cadastrar(const std::string& titulo, const std::string& autor, const std::string& genero);
+    Resultado definirStatus(const std::string& titulo, bool lido);
     Resultado remover(const std::string& titulo);
 
     bool vazia() const;
