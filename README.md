@@ -3,7 +3,7 @@
 Atividade da Unidade 2 de Linguagem de Programação I. Leia `ENUNCIADO.md`
 antes de começar.
 
-Sistema em C++11 que registra livros lidos e por ler, com nota e comentário,
+Sistema em C++11 que registra livros lidos e por ler, com nota e comentário,   
 e oferece consultas: livros de um autor, gêneros mais lidos e livros mais bem
 avaliados. A descrição completa está em `DESCRICAO.md`.
 
@@ -43,28 +43,35 @@ estiver escrito aqui.
 
 ## Onde uso a STL
 
-Escreva esta seção sem IA. Para cada container ou algoritmo da STL que o
-sistema usa: em que classe ele está, o que guarda, e por que você escolheu
-ele e não outro.
+Escreva esta seção sem IA. Para cada container ou algoritmo da STL que o sistema usa: em que classe ele está, o que guarda, e por que você escolheu ele e não outro.
 
-| Onde | O quê | Por quê |
-| --- | --- | --- |
-| `Estante` (campo `livros`) | `std::list<Livro>` | guarda os livros na ordem de cadastro; insiro no fim e removo no meio mantendo a ordem, e os demais iteradores continuam válidos |
-| `Estante::buscar` | `std::find` sobre a `list`, usando `Livro::operator==` (título normalizado) | localiza um livro pelo título; O(n) é aceitável e evita manter estrutura duplicada |
-| `Estante::generosMaisLidos` | `std::map<std::string, GeneroEstatistica>` | chave = gênero normalizado → grafia + quantidade de lidos; agrupa grafias iguais, busca/inserção O(log n) |
-| `Estante` (`listar`, `livrosDoAutor`, `livrosMaisBemAvaliados`, `generosMaisLidos`) | `std::vector<Livro>` / `std::vector<GeneroEstatistica>` | devolve cópias para exibir/ordenar; armazenamento contíguo e fácil de ordenar |
-| `Estante::livrosMaisBemAvaliados` | `std::sort` sobre `std::vector<Livro>` | ordena com `Livro::operator<` (nota decrescente; empate = mais recente) |
-| `Livro` | `Livro::operator==` | compara título normalizado; usado pelo `std::find` |
-| `Livro` | `Livro::operator<` | "melhor avaliado primeiro"; usado pelo `std::sort` |
+1. Classe: Estante (campo livros)
+O que guarda: std::list<Livro>
+Por quê: Escolhi a lista para guardar os livros na ordem em que foram cadastrados.
+2. Classe: Estante::buscar
+O que guarda: std::find
+Por quê: Para procurar um livro pelo título. A busca percorre a lista e compara os títulos usando o operator==, que ignora diferenças entre letras maiúsculas e minúsculas e espaços nas pontas.
+3. Classe: Estante::generosMaisLidos
+O que guarda: std::map<std::string, GeneroEstatistica>
+Por quê: Para reunir os livros do mesmo gênero, mesmo quando o nome foi escrito com diferenças entre maiúsculas e minúsculas. Ele guarda a grafia do gênero e a quantidade de livros lidos.
+4. Classe: Estante (consultas)
+O que guarda: std::vector<Livro> e std::vector<GeneroEstatistica>
+Por quê: Uso vetores para reunir os resultados das consultas. Eles facilitam a organização dos dados e permitem ordenar os livros quando necessário.
+5. Classe: Estante::livrosMaisBemAvaliados
+O que guarda: std::sort
+Por quê: Para colocar os livros com as maiores notas primeiro. Quando dois livros têm a mesma nota, o mais recentemente cadastrado aparece antes.
+6. Classe: Livro
+O que guarda: Livro::operator==
+Por quê: Define quando dois livros são considerados iguais: quando seus títulos correspondem após a normalização. Isso permite que o std::find encontre o livro corretamente.
+7. Classe: Livro
+O que guarda: Livro::operator<
+Por quê: Define a ordem dos livros na classificação: primeiro os de maior nota e, em caso de empate, os cadastrados mais recentemente. O std::sort usa essa regra.
 
 ## Como usei a IA
 
 Escreva com as suas palavras:
 
-- Modelo usado: <PREENCHER: modelo/ferramenta usada>
-- Um pedido que deu certo, e por que você acha que deu certo: o `PLANO.md` foi
-  commitado antes de qualquer código (`1dd8fab`) e cada etapa virou um commit
-  separado (`e458f6f`…`c55fa0d`). <PREENCHER: por que você acha que deu certo>
-- Um pedido que deu errado, o que veio errado e como você mudou o pedido:
-  <PREENCHER: não verificável no histórico>
-- Uma coisa que a IA sugeriu e você recusou, e por quê: <PREENCHER>
+- Modelo usado: OpenCode DeepSeek V4.1
+- Um pedido que deu certo, e por que você acha que deu certo: Pedi um plano de implementação antes de começar a programar e trabalhei uma etapa por vez. Isso ajudou a organizar o desenvolvimento, separar as funcionalidades e verificar cada etapa antes de prosseguir. O plano foi registrado em um commit antes da implementação, e as etapas seguintes também foram registradas em commits separados.
+- Um pedido que deu errado, o que veio errado e como você mudou o pedido: Não identifiquei um pedido que tenha dado errado durante o desenvolvimento.
+- Uma coisa que a IA sugeriu e você recusou, e por quê: Recusei a ideia de exigir que todo livro com nota tivesse um comentário e vice-versa. Considerei essa regra limitante e pouco prática, pois o usuário deve poder atribuir uma nota sem escrever um comentário, escrever um comentário sem atribuir uma nota ou fornecer ambos.
