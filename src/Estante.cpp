@@ -37,6 +37,18 @@ Estante::Estante()
     : proximaOrdem(0) {
 }
 
+void Estante::restaurar(const std::vector<Livro>& carregados) {
+    livros.clear();
+    proximaOrdem = 0;
+
+    for (std::size_t i = 0; i < carregados.size(); ++i) {
+        livros.push_back(carregados[i]);
+        if (carregados[i].ordem() > proximaOrdem) {
+            proximaOrdem = carregados[i].ordem();
+        }
+    }
+}
+
 Resultado Estante::cadastrar(const std::string& titulo, const std::string& autor, const std::string& genero) {
     std::string tituloAparado = Texto::aparar(titulo);
     std::string autorAparado = Texto::aparar(autor);

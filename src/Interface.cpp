@@ -2,13 +2,35 @@
 
 #include <iostream>
 #include <limits>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
 #include "Texto.hpp"
 
-Interface::Interface(Estante& estante)
-    : estante(estante) {
+Interface::Interface(Estante& estante, Arquivo& arquivo)
+    : estante(estante),
+      arquivo(arquivo) {
+}
+
+bool Interface::carregarDados() {
+    try {
+        std::vector<Livro> carregados;
+        arquivo.carregar(carregados);
+        estante.restaurar(carregados);
+        return true;
+    } catch (const std::runtime_error& erro) {
+        std::cout << "Erro ao carregar: " << erro.what() << "\n";
+        return false;
+    }
+}
+
+void Interface::salvarDados() {
+    try {
+        arquivo.salvar(estante.listar());
+    } catch (const std::runtime_error& erro) {
+        std::cout << "Erro ao salvar: " << erro.what() << "\n";
+    }
 }
 
 int Interface::lerOpcao() {
@@ -194,7 +216,7 @@ void Interface::mostrarAvaliados() {
     }
 }
 
-void Interface::executar() {
+void Interface::menu() {
     bool executando = true;
 
     while (executando) {
@@ -223,4 +245,13 @@ void Interface::executar() {
             std::cout << "Essa opcao nao existe.\n";
         }
     }
+}
+
+void Interface::executar() {
+    if (!carregarDados()) {
+        return;
+    }
+
+    menu();
+    salvarDados();
 }

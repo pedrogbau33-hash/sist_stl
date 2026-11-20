@@ -2,4 +2,5 @@ sistema
 sistema.exe
 *.o
 *.db
+estante.txt
 .DS_Store

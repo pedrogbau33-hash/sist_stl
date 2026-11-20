@@ -28,6 +28,9 @@ g++ -std=c++11 -Wall -Wextra src/*.cpp -Iinclude -o sistema
 ./sistema
 ```
 
+O programa salva os dados em `estante.txt`. Para testar os exemplos
+a partir de uma estante vazia, apague esse arquivo antes de executar:
+
 Para rodar os exemplos:
 
 ```bash
@@ -41,6 +44,10 @@ Para rodar os exemplos:
 Se o comando mudar, atualize esta seção. Na correção eu vou usar o que
 estiver escrito aqui.
 
+## Evolução
+
+### Unidade 3 — Persistência em arquivos
+Nesta etapa, implementei a persistência dos livros em um arquivo de texto, permitindo que os dados cadastrados continuem disponíveis mesmo depois que o programa é encerrado. Para isso, criei a classe Arquivo, responsável exclusivamente por salvar e carregar os dados. Também implementei validações para identificar registros inválidos, tratamento de erros por meio de exceções e cuidados para evitar que um arquivo com dados incorretos carregue parcialmente a estante. Por fim, realizei testes para verificar a gravação, a recuperação dos dados e o comportamento do programa diante de arquivos inexistentes ou informações inválidas.
 ## Onde uso a STL
 
 Escreva esta seção sem IA. Para cada container ou algoritmo da STL que o
@@ -61,10 +68,10 @@ ele e não outro.
 
 Escreva com as suas palavras:
 
-- Modelo usado: <PREENCHER: modelo/ferramenta usada>
+- Modelo usado: OpenCode DeepSeek V4.1.
 - Um pedido que deu certo, e por que você acha que deu certo: o `PLANO.md` foi
   commitado antes de qualquer código (`1dd8fab`) e cada etapa virou um commit
-  separado (`e458f6f`…`c55fa0d`). <PREENCHER: por que você acha que deu certo>
+  separado (`e458f6f`…`c55fa0d`). Pedi um plano de implementação antes de começar a programar e trabalhei uma etapa por vez. Isso ajudou a organizar o desenvolvimento, compreender as mudanças necessárias e verificar cada parte antes de prosseguir.
 - Um pedido que deu errado, o que veio errado e como você mudou o pedido:
-  <PREENCHER: não verificável no histórico>
-- Uma coisa que a IA sugeriu e você recusou, e por quê: <PREENCHER>
+  Durante a implementação, a alteração do README acabou modificando também partes que deveriam ser preservadas, como a seção sobre o uso da STL. Foi necessário conferir o histórico do Git e restaurar o arquivo original antes de refazer as alterações necessárias de forma mais restrita.
+- Uma coisa que a IA sugeriu e você recusou, e por quê: Recusei a ideia de exigir que todo livro com nota tivesse um comentário e vice-versa. Considerei essa regra limitante e pouco prática, pois o usuário deve poder atribuir uma nota sem escrever um comentário, escrever um comentário sem atribuir uma nota ou fornecer ambos.

@@ -3,16 +3,22 @@
 
 #include <string>
 
+#include "Arquivo.hpp"
 #include "Estante.hpp"
 
 class Interface {
 public:
-    explicit Interface(Estante& estante);
+    Interface(Estante& estante, Arquivo& arquivo);
 
     void executar();
 
 private:
     Estante& estante;
+    Arquivo& arquivo;
+
+    bool carregarDados();
+    void salvarDados();
+    void menu();
 
     int lerOpcao();
     std::string lerLinha(const std::string& rotulo);

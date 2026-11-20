@@ -28,6 +28,8 @@ class Estante {
 public:
     Estante();
 
+    void restaurar(const std::vector<Livro>& carregados);
+
     Resultado cadastrar(const std::string& titulo, const std::string& autor, const std::string& genero);
     Resultado definirStatus(const std::string& titulo, bool lido);
     Resultado avaliar(const std::string& titulo, const std::string& entradaNota, const std::string& entradaComentario);
