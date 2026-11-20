@@ -45,6 +45,43 @@ static bool interpretarInteiro(const std::string& texto, int& valor) {
     return true;
 }
 
+static bool verificarExistencia(const std::string& nome, bool& existe) {
+    errno = 0;
+    std::FILE* arquivo = std::fopen(nome.c_str(), "rb");
+
+    if (arquivo != NULL) {
+        std::fclose(arquivo);
+        existe = true;
+        return true;
+    }
+
+    if (errno == ENOENT) {
+        existe = false;
+        return true;
+    }
+
+    return false;
+}
+
+static bool removerSeExistir(const std::string& nome) {
+    errno = 0;
+    if (std::remove(nome.c_str()) == 0) {
+        return true;
+    }
+
+    return errno == ENOENT;
+}
+
+static void fecharERemoverTemporario(std::ofstream& saida, const std::string& temporario, std::string& aviso) {
+    if (saida.is_open()) {
+        saida.close();
+    }
+
+    if (!removerSeExistir(temporario)) {
+        aviso = " Nao foi possivel remover o arquivo temporario \"" + temporario + "\".";
+    }
+}
+
 Arquivo::Arquivo(const std::string& nomeArquivo)
     : nomeArquivo_(nomeArquivo) {
 }
@@ -295,26 +332,96 @@ void Arquivo::carregar(std::vector<Livro>& livros) const {
 }
 
 void Arquivo::salvar(const std::vector<Livro>& livros) const {
-    std::ofstream saida(nomeArquivo_.c_str());
+    const std::string temporario = nomeArquivo_ + ".tmp";
+    const std::string backup = nomeArquivo_ + ".bak";
 
+    bool backupExiste = false;
+    if (!verificarExistencia(backup, backupExiste)) {
+        throw std::runtime_error("Nao foi possivel verificar o arquivo de backup \"" + backup + "\".");
+    }
+    if (backupExiste) {
+        throw std::runtime_error("O arquivo de backup \"" + backup + "\" ja existe. Verifique a recuperacao antes de salvar.");
+    }
+
+    bool temporarioExiste = false;
+    if (!verificarExistencia(temporario, temporarioExiste)) {
+        throw std::runtime_error("Nao foi possivel verificar o arquivo temporario \"" + temporario + "\".");
+    }
+    if (temporarioExiste && !removerSeExistir(temporario)) {
+        throw std::runtime_error("Nao foi possivel remover o arquivo temporario antigo \"" + temporario + "\".");
+    }
+
+    std::ofstream saida(temporario.c_str(), std::ios::out | std::ios::trunc);
     if (!saida.is_open()) {
-        throw std::runtime_error("Nao foi possivel abrir o arquivo \"" + nomeArquivo_ + "\" para escrita.");
+        throw std::runtime_error("Nao foi possivel abrir o arquivo temporario \"" + temporario + "\" para escrita. O arquivo original nao foi alterado.");
     }
 
     for (std::size_t i = 0; i < livros.size(); ++i) {
         saida << linhaDoLivro(livros[i]) << '\n';
         if (!saida) {
-            throw std::runtime_error("Falha ao escrever no arquivo \"" + nomeArquivo_ + "\".");
+            std::string aviso;
+            fecharERemoverTemporario(saida, temporario, aviso);
+            throw std::runtime_error("Falha ao escrever no arquivo temporario \"" + temporario + "\". O arquivo original nao foi alterado." + aviso);
         }
     }
 
     saida.flush();
     if (!saida) {
-        throw std::runtime_error("Falha ao finalizar a escrita no arquivo \"" + nomeArquivo_ + "\".");
+        std::string aviso;
+        fecharERemoverTemporario(saida, temporario, aviso);
+        throw std::runtime_error("Falha ao finalizar a escrita no arquivo temporario \"" + temporario + "\". O arquivo original nao foi alterado." + aviso);
     }
 
     saida.close();
     if (saida.fail()) {
-        throw std::runtime_error("Falha ao fechar o arquivo \"" + nomeArquivo_ + "\".");
+        std::string aviso;
+        fecharERemoverTemporario(saida, temporario, aviso);
+        throw std::runtime_error("Falha ao fechar o arquivo temporario \"" + temporario + "\". O arquivo original nao foi alterado." + aviso);
+    }
+
+    bool tinhaOriginal = false;
+    if (!verificarExistencia(nomeArquivo_, tinhaOriginal)) {
+        std::string aviso;
+        if (!removerSeExistir(temporario)) {
+            aviso = " Nao foi possivel remover o arquivo temporario \"" + temporario + "\".";
+        }
+        throw std::runtime_error("Nao foi possivel verificar o arquivo \"" + nomeArquivo_ + "\". O arquivo original nao foi alterado." + aviso);
+    }
+
+    if (tinhaOriginal && std::rename(nomeArquivo_.c_str(), backup.c_str()) != 0) {
+        std::string aviso;
+        if (!removerSeExistir(temporario)) {
+            aviso = " Nao foi possivel remover o arquivo temporario \"" + temporario + "\".";
+        }
+        throw std::runtime_error("Nao foi possivel mover o arquivo original \"" + nomeArquivo_ + "\" para o backup \"" + backup + "\". O arquivo original nao foi alterado." + aviso);
+    }
+
+    if (std::rename(temporario.c_str(), nomeArquivo_.c_str()) != 0) {
+        bool restaurado = false;
+        if (tinhaOriginal && std::rename(backup.c_str(), nomeArquivo_.c_str()) == 0) {
+            restaurado = true;
+        }
+
+        if (restaurado) {
+            std::string aviso;
+            if (!removerSeExistir(temporario)) {
+                aviso = " Nao foi possivel remover o arquivo temporario \"" + temporario + "\".";
+            }
+            throw std::runtime_error("Falha ao substituir o arquivo \"" + nomeArquivo_ + "\" pelo temporario. O arquivo original foi restaurado." + aviso);
+        }
+
+        if (tinhaOriginal) {
+            throw std::runtime_error("Falha ao substituir o arquivo \"" + nomeArquivo_ + "\" pelo temporario e falha ao restaurar o original. Backup em \"" + backup + "\" e novo arquivo em \"" + temporario + "\".");
+        }
+
+        std::string aviso;
+        if (!removerSeExistir(temporario)) {
+            aviso = " Nao foi possivel remover o arquivo temporario \"" + temporario + "\".";
+        }
+        throw std::runtime_error("Falha ao substituir o arquivo \"" + nomeArquivo_ + "\" pelo temporario. O arquivo original nao existia e continua ausente." + aviso);
+    }
+
+    if (tinhaOriginal && !removerSeExistir(backup)) {
+        throw std::runtime_error("Dados salvos em \"" + nomeArquivo_ + "\", mas nao foi possivel remover o backup \"" + backup + "\". O backup precisa ser removido manualmente.");
     }
 }
