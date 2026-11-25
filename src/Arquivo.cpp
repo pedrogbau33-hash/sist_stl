@@ -296,6 +296,7 @@ void Arquivo::carregar(std::vector<Livro>& livros) const {
 
     std::vector<Livro> lidos;
     std::set<int> ordensVistas;
+    std::set<std::string> titulosVistos;
     std::string linha;
     int numeroLinha = 0;
 
@@ -318,6 +319,14 @@ void Arquivo::carregar(std::vector<Livro>& livros) const {
             throw std::runtime_error(
                 "Arquivo \"" + nomeArquivo_ + "\", linha " + std::to_string(numeroLinha) +
                 ": ordem de cadastro " + std::to_string(livro.ordem()) + " duplicada."
+            );
+        }
+
+        const std::string tituloNormalizado = Texto::normalizar(livro.titulo());
+        if (!titulosVistos.insert(tituloNormalizado).second) {
+            throw std::runtime_error(
+                "Arquivo \"" + nomeArquivo_ + "\", linha " + std::to_string(numeroLinha) +
+                ": titulo duplicado: \"" + livro.titulo() + "\"."
             );
         }
 
